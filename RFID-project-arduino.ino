@@ -1,154 +1,153 @@
+//Viral Science www.viralsciencecreativity.com www.youtube.com/c/viralscience
+//RFID Door Lock System
+
+#include <Wire.h>
 #include <SPI.h>
 #include <MFRC522.h>
-#include <Servo.h>
-
-// RFID Module
+#include <LiquidCrystal_I2C.h> 
+LiquidCrystal_I2C lcd(0x3F, 16, 2);
+ 
 #define SS_PIN 10
 #define RST_PIN 9
-MFRC522 mfrc522(SS_PIN, RST_PIN);  // Create MFRC522 instance.
-
-// RFID read
-int readsuccess;
-byte readcard[4];
-char str[32] = "";
-String StrUID;
-
-//LED
-int ledRed = 2;
-int ledBlue = 3;
-//int ledGreen = 4;
-
-//Door status
-int doorState = 1;
-
-//Button
-// int button = 5;
-// int ButtonValue = 0;
-
-//Servo
-Servo servo;
-int posServo = 0;
-
-//reset
-void(* resetFunc) (void) = 0;
-
-void setup() {
-  Serial.begin(9600); // Initialize serial communications with the PC
-  SPI.begin();      // Init SPI bus
-  mfrc522.PCD_Init(); // Init MFRC522 card
-  mfrc522.PCD_SetAntennaGain(mfrc522.RxGain_max); // Increase to max frequency
-
-  // RFID Module checker
-  if(!mfrc522.PCD_PerformSelfTest()){
-    Serial.println("RFiD reader failed to initialized");
-    Serial.println("Restarting...");
-    delay(500);
-    resetFunc();
-  }
-
-  else{
-    Serial.println("RFiD reader success initialized");
-  }
-
-  //Set pin mode
-  pinMode(ledRed, OUTPUT);
-  pinMode(ledBlue, OUTPUT);
-  servo.attach(6);
-
-  // Initial servo postion
-  servo.write(posServo);
-  digitalWrite(ledRed, HIGH);
-
-  Serial.println("Please Scan your card\n");
-
-}
-
-void loop() {
-  readsuccess = getid();
-
-  if(readsuccess){
-    Serial.println(StrUID);
-    Serial.println("");   
-    
-    if (StrUID=="80910D7C" || StrUID=="F059FE73") { // Registered card
-      doorControl(); // Open/close door
-    }
-    else {  //Not registered card
-      Serial.println("Status : Unknown\n");
-      servo.write(0); // reset to lock postion
-      digitalWrite(ledBlue, LOW); // turn off red led
-      delay(500);
-      for (int i = 0; i < 3; i++){ // Blinking red led
-        digitalWrite(ledRed, HIGH);
-        delay(500);
-        digitalWrite(ledRed, LOW);
-        delay(500);
-      }
-      digitalWrite(ledRed, HIGH); // Reset to default red led
-      
-    }
-    //digitalWrite(ledRed, LOW);
-    //digitalWrite(ledBlue, LOW);
-
-
-  }
-}
-
-int getid(){  
-  if(!mfrc522.PICC_IsNewCardPresent()){
-    return 0;
-  }
-  if(!mfrc522.PICC_ReadCardSerial()){
-    return 0;
-  }
+#define LED_G 4 //define green LED pin
+#define LED_R 5 //define red LED
+#define BUZZER 2 //buzzer pin
+#define lock 3
+MFRC522 mfrc522(SS_PIN, RST_PIN);   // Create MFRC522 instance.
+int Btn = 6;
  
-Serial.println("Please Scan your card\n");
-  Serial.print("UID:");
-  
-  for(int i=0;i<4;i++){
-    readcard[i]=mfrc522.uid.uidByte[i]; //storing the UID of the tag in readcard
-    array_to_string(readcard, 4, str);
-    StrUID = str;
-  }
-  mfrc522.PICC_HaltA(); // Stop reading
-  return 1;
-}
-
-void array_to_string(byte array[], unsigned int len, char buffer[])
+void setup() 
 {
-    for (unsigned int i = 0; i < len; i++)
-    {
-        byte nib1 = (array[i] >> 4) & 0x0F;
-        byte nib2 = (array[i] >> 0) & 0x0F;
-        buffer[i*2+0] = nib1  < 0xA ? '0' + nib1  : 'A' + nib1  - 0xA;
-        buffer[i*2+1] = nib2  < 0xA ? '0' + nib2  : 'A' + nib2  - 0xA;
-    }
-    buffer[len*2] = '\0';
-}
+  Serial.begin(9600);   // Initiate a serial communication
+  SPI.begin();      // Initiate  SPI bus
+  mfrc522.PCD_Init();   // Initiate MFRC522
+  pinMode(LED_G, OUTPUT);
+  pinMode(LED_R, OUTPUT);
+  pinMode(BUZZER, OUTPUT);
+  noTone(BUZZER);
+  pinMode(Btn,INPUT);
+  pinMode(lock,OUTPUT);
+  Serial.println("Place your card on reader...");
+  Serial.println();
+  lcd.begin();
+  lcd.backlight();
+  lcd.clear();
+  lcd.setCursor(0,0); // column, row
+  lcd.print(" Scan Your RFID "); 
+  lcd.setCursor(0,1); // column, row
+  lcd.print("   Door Locked   ");
 
-void doorControl(){
+ }
+void loop() 
+{
 
-  // Opening Door
-  if (doorState ==1){
-    Serial.println("Status : Registered"); 
-    digitalWrite(ledBlue, HIGH); // Blue On
-    digitalWrite(ledRed, LOW); // Red off
-    Serial.println("Door: Opened");
-    posServo = 90;
+if(digitalRead(Btn) == HIGH){
+  
+    Serial.println("Access Granted");
+    Serial.println();
+    delay(500);
+    digitalWrite(LED_G, HIGH);
+    lcd.setCursor(0,1); // column, row
+    lcd.print(" Door Un-Locked ");
+    tone(BUZZER, 2000);
+    delay(100);
+    noTone(BUZZER);
+    delay(50);
+    tone(BUZZER, 2000);
+    delay(100);
+    noTone(BUZZER);
+    digitalWrite(lock,HIGH);
+    delay(3000);
+    digitalWrite(lock,LOW);
+    delay(100);
+    digitalWrite(LED_G, LOW);
+    lcd.setCursor(0,1); // column, row
+    lcd.print("   Door Locked   ");
+    tone(BUZZER, 2000);
+    delay(100);
+    noTone(BUZZER);
+  delay(50);
   }
 
-  // Closing Door
-  else{
-    digitalWrite(ledBlue, LOW); // Blue off
-    digitalWrite(ledRed, HIGH); // Red on
-    Serial.println("Door: Closed");
-    posServo = 0;
+
+  // Look for new cards
+  if ( ! mfrc522.PICC_IsNewCardPresent()) 
+  {
+    return;
+  }
+  // Select one of the cards
+  if ( ! mfrc522.PICC_ReadCardSerial()) 
+  {
+    return;
+  }
+  //Show UID on serial monitor
+  Serial.print("UID tag :");
+  String content= "";
+  byte letter;
+  for (byte i = 0; i < mfrc522.uid.size; i++) 
+  {
+     Serial.print(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " ");
+     Serial.print(mfrc522.uid.uidByte[i], HEX);
+     content.concat(String(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " "));
+     content.concat(String(mfrc522.uid.uidByte[i], HEX));
+  }
+  Serial.println();
+  Serial.print("Message : ");
+  content.toUpperCase();
+
+
+  
+ if (content.substring(1) == "83 23 38 BB") //change here the UID of card/cards or tag/tags that you want to give access
+  {
+    Serial.println("Access Granted");
+    Serial.println();
+    delay(500);
+    digitalWrite(LED_G, HIGH);
+    lcd.setCursor(0,1); // column, row
+    lcd.print(" Door Un-Locked ");
+    tone(BUZZER, 2000);
+    delay(100);
+    noTone(BUZZER);
+    delay(50);
+    tone(BUZZER, 2000);
+    delay(100);
+    noTone(BUZZER);
+    digitalWrite(lock,HIGH);
+    delay(3000);
+    digitalWrite(lock,LOW);
+    delay(100);
+    digitalWrite(LED_G, LOW);
+    lcd.setCursor(0,1); // column, row
+    lcd.print("   Door Locked   ");
+    tone(BUZZER, 2000);
+    delay(100);
+    noTone(BUZZER);
+    delay(50);
   }
 
-  servo.write(posServo);  // Change the servo postion
-  doorState = -doorState; // Flip door State
-
-  //digitalWrite(ledGreen, HIGH);
-  //delay(1000);
-  //digitalWrite(ledGreen, LOW);
-}
+else
+{
+    lcd.setCursor(0,1); // column, row
+    lcd.print("Invalid RFID Tag");
+    Serial.println(" Access denied");
+    digitalWrite(LED_R, HIGH);
+    tone(BUZZER, 1500);
+    delay(500);
+    digitalWrite(LED_R, LOW);
+    noTone(BUZZER);
+    delay(100);
+    digitalWrite(LED_R, HIGH);
+    tone(BUZZER, 1500);
+    delay(500);
+    digitalWrite(LED_R, LOW);
+    noTone(BUZZER);
+    delay(100);
+    digitalWrite(LED_R, HIGH);
+    tone(BUZZER, 1500);
+    delay(500);
+    digitalWrite(LED_R, LOW);
+    noTone(BUZZER);
+    lcd.setCursor(0,1); // column, row
+    lcd.print("   Door Locked   ");
+ }
+ }
