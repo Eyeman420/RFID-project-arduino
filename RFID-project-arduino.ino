@@ -70,7 +70,7 @@ void loop() {
     Serial.println(StrUID);
     Serial.println("");   
     
-    if (StrUID=="80910D7C") { // Registered card
+    if (StrUID=="80910D7C" || StrUID=="F059FE73") { // Registered card
       doorControl(); // Open/close door
     }
     else {  //Not registered card
@@ -129,7 +129,7 @@ void array_to_string(byte array[], unsigned int len, char buffer[])
 void doorControl(){
 
   // Opening Door
-  if (doorState == 1){
+  if (doorState ==1){
     Serial.println("Status : Registered"); 
     digitalWrite(ledBlue, HIGH); // Blue On
     digitalWrite(ledRed, LOW); // Red off
