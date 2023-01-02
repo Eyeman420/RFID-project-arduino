@@ -10,6 +10,7 @@ LiquidCrystal_I2C lcd(0x27, 16, 2);
 #define LED_G 3                    // Define green LED as pin 3
 #define LED_R 2                    // Define red LED as pin 2
 MFRC522 mfrc522(SS_PIN, RST_PIN);  // Create MFRC522 instance
+const int buzzer = 7;              // buzzer 
 
 //int button = 4;                   // Set button on pin 4
 Servo servo;  // Declare servo
@@ -26,6 +27,7 @@ void setup() {
   SPI.begin();                                     // Init SPI bus
   mfrc522.PCD_Init();                              // Init MFRC522 card
   mfrc522.PCD_SetAntennaGain(mfrc522.RxGain_max);  // Increase to max frequency
+  pinMode(buzzer, OUTPUT); // Set buzzer - pin 9 as an output
 
   // RFID Module checker
   if (!mfrc522.PCD_PerformSelfTest()) {
@@ -63,7 +65,9 @@ void loop() {
       Serial.println("Access Granted");
       //Serial.println();
       // Unlock();
+      
     } else {
+      
       lcd.setCursor(0, 0);
       lcd.print("Invalid RFID Tag");
       Serial.println("Invalid RFID Tag");
@@ -71,6 +75,10 @@ void loop() {
       lcd.print("   Door Locked   ");
       Serial.println("Door Locked");
       Lock();
+      tone(buzzer, 1000); // Send 1KHz sound signal...
+      delay(1000);        // ...for 1 sec
+      noTone(buzzer);     // Stop sound...
+      delay(1000);        // ...for 1sec
       for (int i = 0; i < 3; i++) {
         digitalWrite(LED_R, HIGH);
         delay(500);
@@ -81,6 +89,8 @@ void loop() {
   }
   // Read button
   if (button.isSingleClick()) {
+    //Serial.println("Entering registeration mode");
+    //NewRegisterationCard();
     Unlock();
   }
   if (button.isLongClick()) {  //Registering new card mode
@@ -154,7 +164,14 @@ void Unlock() {
   lcd.print("  Door Unlocked ");
   Serial.println("Door Unlocked");
 
-
+ tone(buzzer, 660); //buzzer for unlock
+  delay(400);
+  tone(buzzer, 550);
+  delay(400);
+  tone(buzzer, 440);
+  delay(400);
+  noTone(buzzer);
+  //delay(5000);
   // Automatically locks door after 3 seconds
   delay(3000);
   Lock();  //Lock the door
