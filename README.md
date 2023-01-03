@@ -44,4 +44,4 @@ More features may be implemented in the future.
 | [Syahid Hasenan](https://github.com/syahidsyah)   | 208327 |
 | Faiz Maznan                                       | 207999 |
 | [Aiman Shahrel](https://github.com/Eyeman420)     | 205774 |
-| Faiz Zainuddin                                    | 205456 |
+| [Faiz Zainuddin](https://github.com/Faxz36)       | 205456 |
