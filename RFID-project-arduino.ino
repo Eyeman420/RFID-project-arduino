@@ -27,7 +27,7 @@ void setup() {
   SPI.begin();                                     // Init SPI bus
   mfrc522.PCD_Init();                              // Init MFRC522 card
   mfrc522.PCD_SetAntennaGain(mfrc522.RxGain_max);  // Increase to max frequency
-  pinMode(buzzer, OUTPUT); // Set buzzer - pin 9 as an output
+  pinMode(buzzer, OUTPUT);                         // Set buzzer - pin 9 as an output
 
   // RFID Module checker
   if (!mfrc522.PCD_PerformSelfTest()) {
@@ -58,10 +58,14 @@ void setup() {
 }
 
 void loop() {
+  
   button.update();
+  
   // Read card
   if (ReadCard() == true) {
+    
     if (RegisteredCard() == true) {
+      
       Serial.println("Access Granted");
       //Serial.println();
       // Unlock();
@@ -75,25 +79,29 @@ void loop() {
       lcd.print("   Door Locked   ");
       Serial.println("Door Locked");
       Lock();
-      tone(buzzer, 1000); // Send 1KHz sound signal...
-      delay(1000);        // ...for 1 sec
-      noTone(buzzer);     // Stop sound...
-      delay(1000);        // ...for 1sec
-      for (int i = 0; i < 3; i++) {
+
+      for (int i = 0; i < 5; i++) {
+        
         digitalWrite(LED_R, HIGH);
-        delay(500);
+        tone(buzzer, 250); // 250 Hz sound signal
+        delay(250);    
         digitalWrite(LED_R, LOW);
-        delay(100);
+        noTone(buzzer);
+        delay(250);
       }
     }
   }
+  
   // Read button
   if (button.isSingleClick()) {
+    
     //Serial.println("Entering registeration mode");
     //NewRegisterationCard();
     Unlock();
   }
+
   if (button.isLongClick()) {  //Registering new card mode
+    
     Serial.println("Entering registeration mode");
     NewRegisterationCard();
   }
@@ -126,6 +134,7 @@ bool ReadCard() {
     content.concat(String(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " "));
     content.concat(String(mfrc522.uid.uidByte[i], HEX));
   }
+  
   mfrc522.PICC_HaltA();  // Stop reading card
 
   content.toUpperCase();
@@ -135,50 +144,42 @@ bool ReadCard() {
 }
 
 bool RegisteredCard() {
+  
   bool statRegister = false;
+
   for (int i = 0; i < 10; i++) {
+    
     if (registered[i] == UIDcard) {
 
       statRegister = true;
       Serial.println("Card registered");
-      Unlock();  //Unlock the door
-      // Flashes red LED for 1 second
-      for (int j = 0; j < 10; j++) {
-
-        digitalWrite(LED_R, HIGH);
-        delay(50);
-        digitalWrite(LED_R, LOW);
-        delay(50);
-      }
+      Unlock();   // Unlock the door
+      
       break;
     }
   }
+
   return statRegister;
 }
 
 // Unlocks door
 void Unlock() {
+  
   servo.write(90);
   digitalWrite(LED_G, HIGH);
   lcd.setCursor(0, 1);
   lcd.print("  Door Unlocked ");
   Serial.println("Door Unlocked");
 
- tone(buzzer, 660); //buzzer for unlock
-  delay(400);
-  tone(buzzer, 550);
-  delay(400);
-  tone(buzzer, 440);
-  delay(400);
+  tone(buzzer, 1000); // Buzzer for unlock
+  delay(1000);
   noTone(buzzer);
-  //delay(5000);
-  // Automatically locks door after 3 seconds
-  delay(3000);
-  Lock();  //Lock the door
+  Lock();  // Lock the door
 }
 
 // Locks door
 void Lock() {
+  
   servo.write(15);
   delay(100);
   digitalWrite(LED_G, LOW);
@@ -189,23 +190,23 @@ void Lock() {
 
 // Register new Card
 void NewRegisterationCard() {
+  
   bool findCard = false;
-  lcd.clear();
   // Waiting to read card
+  
   while (!mfrc522.PICC_IsNewCardPresent() || !mfrc522.PICC_ReadCardSerial()) {
-    Serial.println("Waiting to read card");
-    lcd.setCursor(0, 0);
-    lcd.print("Waiting to read card");
+    
+    Serial.println("Scan Your Card To Register");
+    lcd.setCursor(0, 1);
+    lcd.print("   To Register  ");
     digitalWrite(LED_R, HIGH);
-    delay(50);
-    digitalWrite(LED_G, HIGH);
     delay(50);
     digitalWrite(LED_R, LOW);
     delay(50);
+    digitalWrite(LED_G, HIGH);
+    delay(50);
     digitalWrite(LED_G, LOW);
     delay(50);
-
-    continue;
   }
 
   String content = "";
@@ -230,20 +231,25 @@ void NewRegisterationCard() {
     // If ID already exists
     if (registered[i] == UIDcard) {  // Deleting ID
 
-      findCard = true;  //UIDcard registered in array
+      findCard = true;  // UIDcard registered in array
 
       registered[i] = "";
       lcd.setCursor(0, 0);
-      lcd.print("   ID Deleted   ");
-      Serial.println("ID Deleted");
+      lcd.print(" Same ID Found! ");
+      Serial.println("Same ID Found!");
       lcd.setCursor(0, 1);
-      lcd.print("     Success!    ");
-      Serial.println("Sucess!");
+      lcd.print("   ID Deleted!  ");
+      Serial.println("ID Deleted!");
+      digitalWrite(LED_R, HIGH);  
+      delay(2000);
+      digitalWrite(LED_R, LOW);  
       break;
     }
   }
-  //If not found card in array, thus the card not yet registered.
+  
+  // If not found card in array, thus the card not yet registered.
   if (findCard == false) {
+    
     for (int i = 0; i < 10; i++) {
 
       // If an empty index is found
@@ -252,17 +258,14 @@ void NewRegisterationCard() {
         lcd.setCursor(0, 1);
         lcd.print(" ID Registered! ");
         Serial.println("ID Registered!");
+        digitalWrite(LED_G, HIGH);
+        delay(2000);
+        digitalWrite(LED_G, LOW);
         break;
       }
     }
   }
-  // Flashes red LED for 1 second
-  for (int j = 0; j < 10; j++) {
-    digitalWrite(LED_R, HIGH);
-    delay(50);
-    digitalWrite(LED_R, LOW);
-    delay(50);
-  }
+
   for (int i = 0; i < 10; i++) {
     Serial.println(registered[i]);
   }
