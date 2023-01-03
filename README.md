@@ -41,7 +41,7 @@ More features may be implemented in the future.
 | Name | Matric Number |
 |:-----------------------------:|:--------------------------:|
 | [Warren Carvalho](https://github.com/Freezanator) | 206570 |
-| [Syahid Hasenan](https://github.com/syahidsyah)   | 208245 |
+| [Syahid Hasenan](https://github.com/syahidsyah)   | 208327 |
 | Faiz Maznan                                       | 207999 |
 | [Aiman Shahrel](https://github.com/Eyeman420)     | 205774 |
 | Faiz Zainuddin                                    | 205456 |
