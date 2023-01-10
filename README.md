@@ -10,16 +10,19 @@ RFLOCK is a simple Arduino group project for SSK3102-2 Embedded Systems Programm
 <br>
 
 The components used in this project are:
-* Arduino UNO
-* 630/200 breadboard
-* RFID reader
+* Arduino UNO R3 board
+* MFRC522 RFID reader
 * RFID cards and tags
 * 16x2 LCD display
 * SG90 servo motor
+* 630/200 breadboard
 * Pushbutton
-* Blue LED
+* Green LED
 * Red LED
+* Piezo buzzer
+* 3x 220Ω resistors
 * Connecting wires
+
 
 <br>
 
