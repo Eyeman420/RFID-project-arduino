@@ -27,8 +27,9 @@ The components used in this project are:
 <br>
 
 Currently, the locking system has the following features:
-* Locking and unlocking via RFID
-* Registration of new RFID tags
+* Locking and unlocking via RFID cards or tags
+* Registration of new RFID cards or tags
+* Deletion of registered RFID cards or tags
 * Manual override button for unlocking
 
 <br>
